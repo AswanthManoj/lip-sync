@@ -1,5 +1,11 @@
 # lip-sync
 
+## Getting started
+
+Install uv for dependency management
+1. `pip install uv`
+2. `uv sync`
+
 ## Folder Structure
 ```
 lip_reading_project/
@@ -36,4 +42,4 @@ mediapipe>=0.10.3
 
 ## Training Run:
 
-Run the code `python main.py --data_dir /path/to/LRS2_landmarks --batch_size 8 --epochs 20` for training
+Run the code `uv run python main.py --data_dir /path/to/LRS2_landmarks --batch_size 8 --epochs 20` for training
