@@ -9,7 +9,6 @@ lip_reading_project/
 │
 ├── data/
 │   ├── __init__.py
-│   ├── preprocessing.py     # Data preparation and mouth extraction
 │   ├── dataset.py           # Dataset and DataLoader classes
 │   └── tokenizer.py         # Character tokenizer implementation
 │
@@ -18,18 +17,7 @@ lip_reading_project/
 │   ├── architecture.py      # LightweightLipReader model definition
 │   └── training.py          # Training and validation functions
 │
-├── utils/
-│   ├── __init__.py
-│   └── visualization.py     # Functions for visualizing results
-│
-├── raw_data/                # Original LRS2 dataset
-│   └── mvlrs_v1/
-│
-├── landmarks/               # Extracted LRS2_landmarks
-│
-├── preprocessed_mouths/     # Processed mouth regions
-│
-└── checkpoints/             # Saved model checkpoints
+└── LRS2_landmarks/          # Extracted LRS2_landmarks
 ```
 
 
@@ -44,3 +32,8 @@ tqdm>=4.65.0
 matplotlib>=3.7.0
 mediapipe>=0.10.3
 ```
+
+
+## Training Run:
+
+Run the code `python main.py --data_dir /path/to/LRS2_landmarks --batch_size 8 --epochs 20` for training

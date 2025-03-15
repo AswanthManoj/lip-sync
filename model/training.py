@@ -2,36 +2,23 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from tqdm import tqdm
+from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+import sys
 
-def validate(model, val_loader, criterion, device):
-    """Validate the model"""
-    model.eval()
-    val_losses = []
-    
-    with torch.no_grad():
-        for videos, targets, target_lengths, input_lengths in tqdm(val_loader, desc="Validation"):
-            videos = videos.to(device)
-            targets = targets.to(device)
-            
-            # Forward pass
-            logits = model(videos)
-            log_probs = F.log_softmax(logits, dim=-1)
-            
-            # Compute CTC loss
-            input_lengths = torch.full((videos.size(0),), logits.size(1), dtype=torch.long)
-            loss = criterion(log_probs.transpose(0, 1), targets, input_lengths, target_lengths)
-            
-            val_losses.append(loss.item())
-            
-            # Free memory
-            del videos, targets, logits, log_probs
-            torch.cuda.empty_cache()
-    
-    avg_loss = sum(val_losses) / len(val_losses)
-    print(f"Validation Loss: {avg_loss:.4f}")
-    return avg_loss
+# Add parent directory to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from data.dataset import LRS2Dataset
+from data.tokenizer import CharacterTokenizer
+from model.architecture import LightweightLipReader
+from config import CONFIG
+
+def train_val_split(dataset, val_ratio=0.1):
+    """Split dataset into train and validation sets"""
+    val_size = int(len(dataset) * val_ratio)
+    train_size = len(dataset) - val_size
+    return torch.utils.data.random_split(dataset, [train_size, val_size])
 
 def train_model(model, train_loader, val_loader, device, config):
     """Train the model"""
@@ -138,3 +125,31 @@ def train_model(model, train_loader, val_loader, device, config):
     plt.close()
     
     return history
+
+def validate(model, val_loader, criterion, device):
+    """Validate the model"""
+    model.eval()
+    val_losses = []
+    
+    with torch.no_grad():
+        for videos, targets, target_lengths, input_lengths in tqdm(val_loader, desc="Validation"):
+            videos = videos.to(device)
+            targets = targets.to(device)
+            
+            # Forward pass
+            logits = model(videos)
+            log_probs = F.log_softmax(logits, dim=-1)
+            
+            # Compute CTC loss
+            input_lengths = torch.full((videos.size(0),), logits.size(1), dtype=torch.long)
+            loss = criterion(log_probs.transpose(0, 1), targets, input_lengths, target_lengths)
+            
+            val_losses.append(loss.item())
+            
+            # Free memory
+            del videos, targets, logits, log_probs
+            torch.cuda.empty_cache()
+    
+    avg_loss = sum(val_losses) / len(val_losses)
+    print(f"Validation Loss: {avg_loss:.4f}")
+    return avg_loss
